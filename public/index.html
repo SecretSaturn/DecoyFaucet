@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret Network Faucet</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+    body, html {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: 'Montserrat', sans-serif;
+      background: #131316;
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      width: 500px;
+      margin: 0 auto;
+      padding: 2rem;
+      border-radius: 0.5rem;
+      background: #1f1f23;
+      box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.2);
+      text-align: center;
+    }
+
+    h2 {
+      font-size: 2rem;
+      font-weight: 900;
+      background: -webkit-linear-gradient(to right, #06b6d4, #7e22ce);
+      background: linear-gradient(to right, #06b6d4, #7e22ce);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-top: 0rem;
+      margin-bottom: 2rem;
+    }
+
+    .deprecated {
+      color: #ff686b;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .instruction {
+      font-size: 1rem;
+      margin-bottom: 2rem;
+      line-height: 1.5;
+      color: #a9a9b3;
+    }
+
+    .address-input {
+      width: calc(100% - 1.5rem);
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+      border: 1px solid #333;
+      border-radius: 0.5rem;
+      background: #29292d;
+      color: #fff;
+      font-size: 1rem;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .submit-btn {
+      width: calc(100%);
+      padding: 0.75rem;
+      border: none;
+      border-radius: 0.5rem;
+      background: -webkit-linear-gradient(to right, #06b6d4, #7e22ce);
+      background: linear-gradient(to right, #06b6d4, #7e22ce);
+      color: white;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .submit-btn:hover {
+      filter: brightness(90%);
+    }
+
+    .response-message {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      background: rgba(255, 255, 255, 0.1);
+      display: none;
+    }
+
+    .response-message.visible {
+      display: block;
+    }
+
+    .loader-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 50px; /* Adjust as needed */
+    }
+  
+    .loader {
+      border: 4px solid #f3f3f3; /* Smaller border for a smaller loader */
+      border-top: 4px solid #3498db;
+      border-radius: 50%;
+      width: 20px; /* Smaller width */
+      height: 20px; /* Smaller height */
+      animation: spin 2s linear infinite;
+    }
+  
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+  </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Secret Network Fee Grant Faucet</h2>
+      <p class="deprecated">The Fee Grant Faucet is directly integrated into the UI of Secret DApps. You cannot use this special faucet with your wallet.</p>
+      <p class="instruction">To claim a fee grant for usage with secretcli, please enter your Secret Network address below and click the claim button.</p>
+      <input type="text" class="address-input" placeholder="Your secret1... address" id="address" />
+      <button class="submit-btn" onclick="claim()">Claim Fee Grant</button>
+      <div id="response-message" class="response-message"></div>
+    </div>
+    <script>
+    function showLoading(isLoading) {
+      var responseDiv = document.getElementById('response-message');
+      if (isLoading) {
+        responseDiv.innerHTML = '<div class="loader-container"><div class="loader"></div></div>';
+        responseDiv.style.display = 'block';
+      } else {
+        responseDiv.innerHTML = '';
+        responseDiv.style.display = 'block';
+      }
+    }
+
+    function claim() {
+      var addressInput = document.getElementById('address');
+      var address = addressInput.value;
+      var responseDiv = document.getElementById('response-message');
+    
+      if (address) {
+        showLoading(true);
+        fetch('/claim/' + address)
+          .then(response => response.json())
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Server responded with error ' + response.error);
+            }
+            return response;
+          })
+          .then(data => {
+            showLoading(false);
+            console.log('Response Data:', data); 
+            responseDiv.textContent = 'Claim: ' + data;
+            responseDiv.style.color = '#72f1b8';
+          })
+          .catch(error => {
+            showLoading(false);
+            console.error('Error:', error);
+            responseDiv.textContent = 'An error occurred: ' + error;
+            responseDiv.style.color = '#ff686b';
+          });
+      } else {
+        responseDiv.textContent = 'Please enter a valid Secret Network address.';
+        responseDiv.style.color = '#ff686b';
+      }
+    }
+    </script>
+  </body>
+  </html>
