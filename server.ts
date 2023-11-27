@@ -56,6 +56,8 @@ app.use(express.static('public'));
 app.get("/claim/:address", async (req, res) => {
   const { address } = req.params;
 
+  console.log(address)
+
   if (!address) {
     return res.status(400).json({error: "Address is required"});
   }
@@ -101,16 +103,19 @@ app.get("/claim/:address", async (req, res) => {
           return res.json(results);
         }
       }).catch(async (e) => {
+        try {
         if (e.code === 13 && e.message === "fee-grant not found: unauthorized") {
           const feeGrant = await giveFeeGrant(secretjs, address, false);
           
           const results = [{ feegrant: feeGrant?.allowance  }, { address: address }];
           return res.json(results);
         }
-        else {
+      } catch (e) {
+        console.error(e);
+        return res.status(400).json({ error: e });
+      }
           console.error(e);
           return res.status(400).json({ error: e });
-        }
       })
   } catch (error) {
     console.error("Error querying data:", error);
