@@ -34,7 +34,7 @@ const gasLimit = process.env.GAS_LIMIT || "17500";
 
 const memo = process.env.MEMO || "";
 
-const mnemonic = process.env.FAUCET_MNEMOMIC || "";
+const mnemonic = process.env.FAUCET_MNEMOMIC || undefined;
 
 const wallet = new Wallet(mnemonic);
 
@@ -48,6 +48,9 @@ const secretjs = new SecretNetworkClient({
 });
 
 app.listen(PORT, () => {
+  if (mnemonic === undefined) {
+    throw Error("no mnemonic defined, aborting")
+  }
   console.log(`Server is running at http://localhost:${PORT}`);
 });
 
