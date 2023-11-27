@@ -10,12 +10,13 @@ import {
 } from "secretjs";
 import { Timestamp } from "secretjs/dist/protobuf/google/protobuf/timestamp";
 import { QueryAllowanceResponse } from "secretjs/dist/grpc_gateway/cosmos/feegrant/v1beta1/query.pb";
+import { BasicAllowance } from "secretjs/dist/protobuf/cosmos/feegrant/v1beta1/feegrant";
 
 dotenv.config();
 
 const app = express();
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 
 const SECRET_CHAIN_ID = process.env.CHAIN_ID || "secret-4";
 const SECRET_LCD = process.env.LCD || "https://lcd.mainnet.secretsaturn.net";
@@ -80,32 +81,32 @@ app.get("/claim/:address", async (req, res) => {
           if (isFeeGrantExpired(result.allowance.allowance.expiration,faucetReloadSeconds)) {
             console.log("Fee Grant expired");
 
-            await giveFeeGrant(secretjs, address, true);
+            const feeGrant = await giveFeeGrant(secretjs, address, true);
 
-            await sleep(5000)
+/*             await sleep(5000)
 
             const newFeeGrant: QueryAllowanceResponse = await secretjs.query.feegrant.allowance({ grantee: address, granter: faucetAddress })
-
-            const results = [{ feegrant: newFeeGrant?.allowance?.allowance }, { address: address }];
+ */
+            const results = [{ feegrant: feeGrant?.allowance }, { address: address }];
             return res.json(results);
           }
           else {
             console.log("Existing Fee Grant");
 
-            const results = [{ feegrant: result.allowance.allowance }, { address: address }];
+            const results = [{ feegrant: result.allowance }, { address: address }];
             return res.json(results);
           }
         } else {
           console.log("new feegrant");
 
-          await giveFeeGrant(secretjs, address, false);
+          const feeGrant = await giveFeeGrant(secretjs, address, false);
           
-          await sleep(5000)
+/*           await sleep(5000)
 
           const newFeeGrant = await secretjs.query.feegrant.allowance({ grantee: address, granter: faucetAddress })
-          console.log(newFeeGrant)
+          console.log(newFeeGrant) */
 
-          const results = [{ feegrant: newFeeGrant?.allowance?.allowance  }, { address: address }];
+          const results = [{ feegrant: feeGrant?.allowance  }, { address: address }];
           return res.json(results);
         }
       }).catch((e) => {
@@ -116,12 +117,6 @@ app.get("/claim/:address", async (req, res) => {
     console.error("Error querying data:", error);
     return res.status(500).send("Internal Server Error");
   }
-});
-
-app.get("/", async (req, res) => {
-  const htmlContent = ``;
-
-  return res.send(htmlContent);
 });
 
 function isFeeGrantExpired(expirationTime: string, extraSeconds: number) {
@@ -187,10 +182,23 @@ async function giveFeeGrant(
           broadcastMode: BroadcastMode.Block,
         },
     )
-    console.log('Result', tx)
     if (tx) {
       if (tx.code === 0) {
-        return "success";
+        const queryResponse: QueryAllowanceResponse = {
+          allowance: {
+            grantee: address,
+            granter: secretjs.address,
+            allowance: ({
+              "@type": "/cosmos.feegrant.v1beta1.BasicAllowance",
+              spend_limit: [{
+                amount: faucetAmount,
+                denom: faucetDenom
+              }],
+              expiration:  new Date(expirationTimeInSeconds * 1000).toISOString().replace(/\.\d{3}/, '')
+            } as any)
+          }
+        }
+        return queryResponse;
       } else {
         console.error(tx.rawLog);
         throw tx.rawLog
