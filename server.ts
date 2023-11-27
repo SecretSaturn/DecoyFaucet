@@ -83,10 +83,6 @@ app.get("/claim/:address", async (req, res) => {
 
             const feeGrant = await giveFeeGrant(secretjs, address, true);
 
-/*             await sleep(5000)
-
-            const newFeeGrant: QueryAllowanceResponse = await secretjs.query.feegrant.allowance({ grantee: address, granter: faucetAddress })
- */
             const results = [{ feegrant: feeGrant?.allowance }, { address: address }];
             return res.json(results);
           }
@@ -101,17 +97,20 @@ app.get("/claim/:address", async (req, res) => {
 
           const feeGrant = await giveFeeGrant(secretjs, address, false);
           
-/*           await sleep(5000)
-
-          const newFeeGrant = await secretjs.query.feegrant.allowance({ grantee: address, granter: faucetAddress })
-          console.log(newFeeGrant) */
-
           const results = [{ feegrant: feeGrant?.allowance  }, { address: address }];
           return res.json(results);
         }
-      }).catch((e) => {
-        console.error(JSON.stringify(e));
-        return res.status(400).json({ error: e });
+      }).catch(async (e) => {
+        if (e.code === 13 && e.message === "fee-grant not found: unauthorized") {
+          const feeGrant = await giveFeeGrant(secretjs, address, false);
+          
+          const results = [{ feegrant: feeGrant?.allowance  }, { address: address }];
+          return res.json(results);
+        }
+        else {
+          console.error(e);
+          return res.status(400).json({ error: e });
+        }
       })
   } catch (error) {
     console.error("Error querying data:", error);
