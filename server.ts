@@ -84,33 +84,35 @@ app.get("/claim/:address", async (req, res) => {
         console.log("result:",result);
         if (result?.allowance) {
           if (isFeeGrantExpired(result.allowance.allowance.expiration,faucetReloadSeconds)) {
-            console.log("Fee Grant expired");
+            console.log("Fee Grant expired", address);
 
             const feeGrant = await giveFeeGrant(secretjs, address, true);
 
-            const results = [{ feegrant: feeGrant?.allowance }, { address: address }];
+            const results = [{ feegrant: feeGrant?.allowance, address: address }];
             return res.json(results);
           }
           else {
-            console.log("Existing Fee Grant");
+            console.log("Existing Fee Grant", address);
 
-            const results = [{ feegrant: result.allowance }, { address: address }];
+            const results = [{ feegrant: result.allowance, address: address }];
             return res.json(results);
           }
         } else {
-          console.log("new feegrant");
+          console.log("new feegrant", address);
 
           const feeGrant = await giveFeeGrant(secretjs, address, false);
           
-          const results = [{ feegrant: feeGrant?.allowance  }, { address: address }];
+          const results = [{ feegrant: feeGrant?.allowance, address: address }];
           return res.json(results);
         }
       }).catch(async (e) => {
         try {
         if (e.code === 13 && e.message === "fee-grant not found: unauthorized") {
+          console.log("new feegrant", address);
+
           const feeGrant = await giveFeeGrant(secretjs, address, false);
           
-          const results = [{ feegrant: feeGrant?.allowance  }, { address: address }];
+          const results = [{ feegrant: feeGrant?.allowance, address: address }];
           return res.json(results);
         }
       } catch (e) {
