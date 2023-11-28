@@ -88,13 +88,13 @@ app.get("/claim/:address", async (req, res) => {
 
             const feeGrant = await giveFeeGrant(secretjs, address, true);
 
-            const results = [{ feegrant: feeGrant?.allowance, address: address }];
+            const results = { feegrant: feeGrant?.allowance, address: address };
             return res.json(results);
           }
           else {
             console.log("Existing Fee Grant", address);
 
-            const results = [{ feegrant: result.allowance, address: address }];
+            const results = { feegrant: result.allowance, address: address };
             return res.json(results);
           }
         } else {
@@ -102,7 +102,7 @@ app.get("/claim/:address", async (req, res) => {
 
           const feeGrant = await giveFeeGrant(secretjs, address, false);
           
-          const results = [{ feegrant: feeGrant?.allowance, address: address }];
+          const results = { feegrant: feeGrant?.allowance, address: address };
           return res.json(results);
         }
       }).catch(async (e) => {
@@ -112,7 +112,7 @@ app.get("/claim/:address", async (req, res) => {
 
           const feeGrant = await giveFeeGrant(secretjs, address, false);
           
-          const results = [{ feegrant: feeGrant?.allowance, address: address }];
+          const results = { feegrant: feeGrant?.allowance, address: address };
           return res.json(results);
         }
       } catch (e) {
@@ -203,7 +203,7 @@ async function giveFeeGrant(
                 amount: faucetAmount,
                 denom: faucetDenom
               }],
-              expiration:  new Date(expirationTimeInSeconds * 1000).toISOString().replace(/\.\d{3}/, '')
+              expiration: new Date(expirationTimeInSeconds * 1000).toISOString().replace(/\.\d{3}/, '')
             } as any)
           }
         }
