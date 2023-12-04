@@ -1,4 +1,4 @@
-# Secret Feegrant Faucet 2.0
+# Secret Decoy Faucet
 
 The next iteraton of the Fee Grant Faucet written in node express
 
@@ -6,7 +6,7 @@ This faucet app allows anyone to request a fee grant for a Secret Network accoun
 
 ## Installation
 
-Follow these steps to install and run FeeGrantFaucet2.0.
+Follow these steps to install and run Decoy Faucet
 
 ### Prerequisites
 
@@ -20,8 +20,8 @@ Clone the repository to your local machine and navigate to the project directory
 
 ```
 bash
-git clone https://github.com/SecretSaturn/FeeGrantFaucet2.0
-cd FeeGrantFaucet2.0
+git clone https://github.com/SecretSaturn/DecoyFaucet
+cd DecoyFaucet
 ```
 
 ### Install Dependencies
